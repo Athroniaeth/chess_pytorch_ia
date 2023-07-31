@@ -1,6 +1,8 @@
 # Chess_AI_Pytorch
 C'est un projet personnel qui vise à développer une Intelligence Artificielle (IA) pour le jeu d'échecs en utilisant PyTorch. L'objectif est de construire une IA qui, au lieu de se baser sur une fonction récursive min_max pour donner un score à une position, génère directement un coup à jouer. Pour la formation, nous utiliserons une base de données de tactiques de jeu lichess, qui contiens pour une position la suite de bons coups à jouer. Malgré une taille initiale relativement petite (500k), en 'explosant' le jeu de données (avec en moyenne 3.5 coups par tactique), nous atteignons un total ~3.5M de lignes.
 
+Dataset : https://www.kaggle.com/datasets/tianmin/lichess-chess-puzzle-dataset?resource=download
+
 <img src="https://github.com/Athroniaeth/chess_pytorch_ia/raw/main/images/1.png" width="640" height="360">
 
 ## Modèle Inputs:
