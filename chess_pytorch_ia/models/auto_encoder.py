@@ -50,3 +50,5 @@ class AutoEncoder(nn.Module):
 
     def decode(self, x):
         return self.decoder(x)
+# La commande (courte) pylint pour faire le HTML :
+# py

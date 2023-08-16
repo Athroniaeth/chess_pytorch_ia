@@ -1,2 +1,17 @@
+# Environnements virtuels
 venv
-images/*.png binary
+
+# Fichiers pour le README.MD
+images/* binary
+
+# Fichiers générés par pytest-cov
+htmlcov/
+.coverage
+
+# Fichiers générés par PyCharm
+.idea/
+*.iml
+
+# Fichiers bytecode Python
+__pycache__/
+*.pyc
