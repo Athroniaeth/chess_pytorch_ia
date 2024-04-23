@@ -1,54 +1,73 @@
-"""
-Ceci est un AutoEncoder de test pour voir si un espace lattent de 16x (8+8) à la place d'une sortie de 128x (64+64)
-est plus efficace ou non lors de l'entrainement du modèle principale, ici on s'en fiche d'avoir un surentrainement
-car on veut précisement que l'auto encoder arrive a nous sortir exactement la même sortie.
-
-------------
-
-Ceci est un AutoEncoder de test pour voir si un espace lattent de 16x (8+8) à la place d'une sortie de 128x (64+64)
-est plus efficace ou non lors de l'entrainement du modèle principale, ici on s'en fiche d'avoir un surentrainement
-car on veut précisement que l'auto encoder arrive a nous sortir exactement la même sortie.
-
-Remarque : On ne crée en donnée d'entrainement que une matrice de 64, car on utilisera 2x ce modèle pour la sortie du
-modèle principale, une fois pour la position de la pièce a déplacer, une dernière fois pour sa position finale
-"""
+""" Classe abstraite pour le modèle d'auto encodeur de coups à jouer aux échecs"""
+import abc
+from typing import Iterable, List
 
 import numpy
+
 from torch import nn
 
 
-class AutoEncoder(nn.Module):
-    latent_space: numpy.ndarray or None
+class MoveAutoEncoder(nn.Module, metaclass=abc.ABCMeta):
+    """Abstract class for chess move autoencoder model.
 
-    def __init__(self, input_size=64, latent_size=8):
-        super(AutoEncoder, self).__init__()
+    This class serves as the base for chess move prediction models by providing
+    its latent space as output data (encode).
+    """
 
-        # Encodeur
-        self.encoder = nn.Sequential(
-            nn.Linear(input_size, 32),
-            nn.ReLU(),
-            nn.Linear(32, latent_size),
-            nn.ReLU()
-        )
+    def __init__(self,
+                 input_size: int,
+                 latent_size: int,
+                 hidden_layers: List[int],
+                 hidden_activation: nn.Module,
+                 output_activation: nn.Module,
+                 *args,
+                 **kwargs):
+        """Initialize the MoveAutoEncoder.
 
-        # Decodeur
-        self.decoder = nn.Sequential(
-            nn.Linear(latent_size, 32),
-            nn.ReLU(),
-            nn.Linear(32, input_size),
-            nn.Sigmoid()
-        )
+        Args:
+            input_size: The size of the input layer.
+            hidden_layers: The sizes of the hidden layers.
+            latent_size: The size of the latent layer.
+            hidden_activation: Activation function for hidden layers.
+            output_activation: Activation function for output layer.
+        """
+        super().__init__(*args, **kwargs)
+
+        if hidden_layers is None:
+            raise ValueError("hidden_layers must be defined.")
+
+        self.encoder = self._build_hidden_layers(input_size, hidden_layers, hidden_activation, name='encoder')
+        self.decoder = self._build_hidden_layers(latent_size, hidden_layers[::-1], hidden_activation, name='decoder')
+
+        # Ajout de la couche de sortie
+        self.encoder.add_module('encoder_output_layer', nn.Linear(hidden_layers[-1], latent_size))
+        self.encoder.add_module('encoder_output_activation', output_activation)
+
+        self.decoder.add_module('decoder_output_layer', nn.Linear(hidden_layers[0], latent_size))
+        self.decoder.add_module('decoder_output_activation', output_activation)
+
+    @staticmethod
+    def _build_hidden_layers(input_size: int, layer_sizes: Iterable[int], activation: nn.Module, name: str) -> nn.Sequential:
+        """Build a sequence of layers."""
+        layers = nn.Sequential()
+
+        for index, size in enumerate(layer_sizes):
+            layer = nn.Linear(input_size, size)
+            layers.add_module(f'{name}_hidden_layer_{index}', layer)
+            layers.add_module(f'{name}_hidden_activation_{index}', activation)
+            input_size = size
+
+        return layers
 
     def forward(self, x):
-        self.latent_space = self.encoder(x)
-        x = self.decoder(self.latent_space)
-        return x
+        """Forward pass through the autoencoder."""
+        latent_space = self.encode(x)
+        return self.decode(latent_space)
 
     def encode(self, x):
-        self.latent_space = self.encoder(x)
-        return self.latent_space
+        """Encode the input data."""
+        return self.encoder(x)
 
     def decode(self, x):
+        """Decode the input data."""
         return self.decoder(x)
-# La commande (courte) pylint pour faire le HTML :
-# py

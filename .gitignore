@@ -15,3 +15,6 @@ htmlcov/
 # Fichiers bytecode Python
 __pycache__/
 *.pyc
+
+# Anciens fichiers de code
+old/

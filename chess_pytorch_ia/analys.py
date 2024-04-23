@@ -1,7 +1,4 @@
-"""
-Vous trouverez ici les fonctions globales qu'ont besoin
-les scripts d'entrainement dans le dossier 'train'
-"""
+"""Fichier contenant des fonctions pour l'analyse de modèle"""
 
 import torch
 from torch import nn
@@ -9,6 +6,9 @@ from torch.utils.data import DataLoader
 
 
 def check_accuracy(loader: DataLoader, model: nn.Module, device: torch.device):
+    """
+    Fonction pour calculer la précision du modèle
+    """
     num_correct = 0
     num_samples = 0
 
